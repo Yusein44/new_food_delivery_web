@@ -42,15 +42,15 @@ def login(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            auth_login(request, user)  # Влизане в системата
+            auth_login(request, user)
             if user.is_client:
-                return redirect('client_dashboard')  # Пренасочване към клиентския дашбоард
+                return redirect('client_dashboard')
             elif user.is_employee:
-                return redirect('employee_dashboard')  # Пренасочване към дашбоарда за служители
+                return redirect('employee_dashboard')
             elif user.is_delivery_person:
-                return redirect('delivery_person_dashboard')  # Пренасочване към дашбоарда за доставчици
+                return redirect('delivery_person_dashboard')
             else:
-                return redirect('home')  # Резервен вариант, ако ролята не е зададена
+                return redirect('home')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
@@ -66,7 +66,7 @@ def home(request):
 @login_required
 def add_restaurant(request):
     if not request.user.is_employee:
-        return redirect('home')  # Само служители могат да добавят ресторанти
+        return redirect('home')
     if request.method == 'POST':
         form = RestaurantForm(request.POST)
         if form.is_valid():
@@ -112,7 +112,7 @@ def delivery_person_dashboard(request):
 @login_required
 def edit_restaurant(request, pk):
     if not request.user.is_employee:
-        return redirect('home')  # Само служители могат да редактират ресторанти
+        return redirect('home')
     restaurant = get_object_or_404(Restaurant, pk=pk)
     if request.method == 'POST':
         form = RestaurantForm(request.POST, instance=restaurant)
@@ -126,7 +126,7 @@ def edit_restaurant(request, pk):
 @login_required
 def delete_restaurant(request, pk):
     if not request.user.is_employee:
-        return redirect('home')  # Само служители могат да изтриват ресторанти
+        return redirect('home')
     restaurant = get_object_or_404(Restaurant, pk=pk)
     if request.method == 'POST':
         restaurant.delete()
@@ -155,7 +155,7 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def view_products(request):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да правят поръчки
+        return redirect('home')
 
     category = request.GET.get('category')
     if category:
@@ -163,19 +163,18 @@ def view_products(request):
     else:
         products = Product.objects.all()
 
-    categories = Product.CATEGORY_CHOICES  # Всички налични категории
+    categories = Product.CATEGORY_CHOICES
 
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity', 1))
         product = get_object_or_404(Product, pk=product_id)
 
-        # Добавяне или актуализиране на продукта в количката
         cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
         if created:
-            cart_item.quantity = quantity  # Ако е нов запис, задаваме количеството
+            cart_item.quantity = quantity
         else:
-            cart_item.quantity += quantity  # Ако вече съществува, увеличаваме количеството
+            cart_item.quantity += quantity
         cart_item.save()
 
         return redirect('view_products')
@@ -186,9 +185,8 @@ def view_products(request):
 @login_required
 def delivery_dashboard(request):
     if not request.user.is_delivery_person:
-        return redirect('home')  # Само доставчици могат да виждат този дашбоард
+        return redirect('home')
 
-    # Филтриране на поръчки според статуса
     orders = Order.objects.filter(status__in=['pending', 'shipped']).order_by('-created_at')
 
     return render(request, 'accounts/delivery_dashboard.html', {'orders': orders})
@@ -197,7 +195,7 @@ def delivery_dashboard(request):
 @login_required
 def accept_delivery(request, pk):
     if not request.user.is_delivery_person:
-        return redirect('home')  # Само доставчици могат да приемат доставки
+        return redirect('home')
 
     order = get_object_or_404(Order, pk=pk)
     if order.status == 'pending':
@@ -210,9 +208,8 @@ def accept_delivery(request, pk):
 @login_required
 def create_order(request):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да правят поръчки
+        return redirect('home')
 
-    # Филтриране на продукти според категорията
     category = request.GET.get('category')
     if category:
         products = Product.objects.filter(category=category)
@@ -263,7 +260,7 @@ def create_order(request):
 @login_required
 def mark_as_delivered(request, pk):
     if not request.user.is_delivery_person:
-        return redirect('home')  # Само доставчици могат да маркират доставки
+        return redirect('home')
 
     order = get_object_or_404(Order, pk=pk)
     if order.delivery_person == request.user and order.status == 'shipped':
@@ -274,7 +271,7 @@ def mark_as_delivered(request, pk):
 @login_required
 def add_to_cart(request, pk):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да добавят продукти в количката
+        return redirect('home')
     product = get_object_or_404(Product, pk=pk)
     cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
     if not created:
@@ -284,7 +281,7 @@ def add_to_cart(request, pk):
 @login_required
 def view_cart(request):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да правят поръчки
+        return redirect('home')
     cart_items = CartItem.objects.filter(user=request.user)
     total_price = sum(item.product.price * item.quantity for item in cart_items)
     return render(request, 'accounts/view_cart.html', {'cart_items': cart_items, 'total_price': total_price})
@@ -292,7 +289,7 @@ def view_cart(request):
 @login_required
 def remove_from_cart(request, pk):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да премахват продукти от количката
+        return redirect('home')
     cart_item = get_object_or_404(CartItem, pk=pk, user=request.user)
     cart_item.delete()
     return redirect('view_cart')
@@ -301,7 +298,7 @@ def remove_from_cart(request, pk):
 @login_required
 def checkout(request):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да правят поръчки
+        return redirect('home')
 
     client = Client.objects.get(user=request.user)
     cart_items = CartItem.objects.filter(user=request.user)
@@ -312,7 +309,6 @@ def checkout(request):
             address = form.cleaned_data['address']
             phone_number = form.cleaned_data['phone_number']
 
-            # Създаване на поръчка
             order = Order.objects.create(
                 client=client,
                 total_price=sum(item.product.price * item.quantity for item in cart_items),
@@ -327,7 +323,7 @@ def checkout(request):
                     quantity=item.quantity,
                     price=item.product.price * item.quantity
                 )
-            cart_items.delete()  # Изчистваме количката
+            cart_items.delete()
             return redirect('client_dashboard')
     else:
         form = CheckoutForm()
@@ -336,7 +332,7 @@ def checkout(request):
 @login_required
 def track_orders(request):
     if not request.user.is_client:
-        return redirect('home')  # Само клиенти могат да проследяват поръчки
+        return redirect('home')
     client = Client.objects.get(user=request.user)
     orders = Order.objects.filter(client=client).order_by('-created_at')
     return render(request, 'accounts/track_orders.html', {'orders': orders})
