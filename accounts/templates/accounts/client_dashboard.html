@@ -1,0 +1,20 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Клиентски дашборд{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-5 mb-3">Добре дошъл, {{ user.username }}!</h1>
+    <p class="lead">Тук можеш да поръчаш храна, да прегледаш продукти и да следиш поръчките си.</p>
+
+    <img src="{% static 'images/client-dashboard.jpg' %}" class="img-fluid rounded shadow mb-4" alt="Client Dashboard">
+
+    <div class="d-grid gap-3 col-6 mx-auto mt-4">
+        <a href="{% url 'view_products' %}" class="btn btn-outline-primary btn-lg">📦 Виж продукти</a>
+        <a href="{% url 'view_cart' %}" class="btn btn-outline-secondary btn-lg">🛒 Виж количката</a>
+        <a href="{% url 'track_orders' %}" class="btn btn-outline-success btn-lg">🚚 Проследи поръчки</a>
+        <a href="{% url 'logout' %}" class="btn btn-danger btn-lg mt-2">⬅️ Изход</a>
+    </div>
+</div>
+{% endblock %}
