@@ -1,0 +1,42 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Моята количка{% endblock %}
+
+{% block content %}
+<div class="cart-bg py-5">
+    <div class="container text-white">
+        <h1 class="text-center mb-4">🛒 Моята количка</h1>
+
+        {% if cart_items %}
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <ul class="list-group mb-4">
+                        {% for item in cart_items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ item.quantity }} x {{ item.product.name }}
+                                <span>{{ item.product.price }} лв.</span>
+                                <a href="{% url 'remove_from_cart' item.pk %}" class="btn btn-sm btn-outline-danger">Премахни</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="text-end mb-4">
+                        <h4>Обща цена: {{ total_price }} лв.</h4>
+                    </div>
+
+                    <div class="d-grid gap-3 d-md-block text-center">
+                        <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">✅ Финализирай поръчка</a>
+                        <a href="{% url 'client_dashboard' %}" class="btn btn-outline-light btn-lg">⬅️ Назад към дашборда</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center fs-4">Вашата количка е празна.</p>
+            <div class="text-center mt-4">
+                <a href="{% url 'view_products' %}" class="btn btn-outline-light btn-lg">📦 Разгледай продукти</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

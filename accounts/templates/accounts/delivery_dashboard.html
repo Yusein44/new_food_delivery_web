@@ -1,0 +1,61 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Доставки - Дашборд{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-5 mb-3 text-dark">Добре дошъл, {{ user.username }}!</h1>
+    <p class="lead text-dark">Тук можеш да приемаш и управляваш активните доставки.</p>
+
+    <img src="{% static 'images/delivery-dashboard.jpg' %}" class="img-fluid rounded shadow mb-4" alt="Delivery Dashboard">
+
+    <h3 class="text-center mb-4">📋 Активни доставки</h3>
+
+    {% if orders %}
+        <div class="row justify-content-center">
+            {% for order in orders %}
+                <div class="col-md-8">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header fw-bold">
+                            Поръчка #{{ order.id }}
+                        </div>
+                        <div class="card-body text-start">
+                            <ul class="list-unstyled mb-3">
+                                {% for item in order.items.all %}
+                                    <li>🍔 {{ item.quantity }} x {{ item.product.name }} ({{ item.price }} лв.)</li>
+                                {% endfor %}
+                            </ul>
+                            <p><strong>📍 Адрес:</strong> {{ order.address }}</p>
+                            <p><strong>📞 Телефон:</strong> {{ order.phone_number }}</p>
+                            <p><strong>💰 Обща цена:</strong> {{ order.total_price }} лв.</p>
+
+                            <p><strong>Статус:</strong>
+                                {% if order.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">В процес</span>
+                                    <form method="post" action="{% url 'accept_delivery' order.id %}" class="mt-2">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm">✅ Приеми доставка</button>
+                                    </form>
+                                {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-primary">Изпратена</span>
+                                    <form method="post" action="{% url 'mark_as_delivered' order.id %}" class="mt-2">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-info btn-sm">📦 Маркирай като доставена</button>
+                                    </form>
+                                {% elif order.status == 'delivered' %}
+                                    <span class="badge bg-success">Доставена</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Неизвестен статус</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-muted">❌ Няма активни поръчки в момента.</p>
+    {% endif %}
+</div>
+{% endblock %}

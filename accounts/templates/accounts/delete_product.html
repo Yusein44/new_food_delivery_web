@@ -1,0 +1,20 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Изтриване на продукт{% endblock %}
+
+{% block content %}
+<div class="delete-product-bg py-5" style="background: url('{% static 'images/delete-product.jpg' %}') no-repeat center center; background-size: cover;">
+  <div class="container bg-dark bg-opacity-75 p-4 rounded text-white text-center">
+    <h1 class="mb-3">Сигурни ли сте, че искате да изтриете продукта:</h1>
+    <h3 class="mb-4">{{ product.name }}</h3>
+    <p>Категория: {{ product.get_category_display }}</p>
+    <p>Цена: {{ product.price }} лв.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">🗑️ Изтрий</button>
+      <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary ms-2">⬅️ Назад</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

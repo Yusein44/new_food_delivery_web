@@ -1,0 +1,47 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Проследяване на доставки{% endblock %}
+
+{% block content %}
+<div class="track-orders-bg py-5" style="background: url('{% static 'images/track-orders.jpg' %}') center center / cover no-repeat;">
+  <div class="container text-white" style="background-color: rgba(0,0,0,0.7); border-radius: 12px; padding: 30px;">
+    <h1 class="text-center mb-4">Проследяване на доставки</h1>
+
+    {% if orders %}
+      <ul class="list-group mb-4">
+        {% for order in orders %}
+          <li class="list-group-item bg-dark text-white mb-3 rounded">
+            <h5>Поръчка #{{ order.id }}</h5>
+            <ul>
+              {% for item in order.items.all %}
+                <li>{{ item.quantity }} x {{ item.product.name }} ({{ item.price }} лв.)</li>
+              {% endfor %}
+            </ul>
+            <p>Адрес: {{ order.address }}<br>
+            Телефон: {{ order.phone_number }}<br>
+            Обща цена: {{ order.total_price }} лв.<br>
+            Статус:
+            {% if order.status == 'pending' %}
+              <span class="badge bg-warning text-dark">В процес</span>
+            {% elif order.status == 'shipped' %}
+              <span class="badge bg-info text-dark">Изпратена</span>
+            {% elif order.status == 'delivered' %}
+              <span class="badge bg-success">Доставена</span>
+            {% else %}
+              <span class="badge bg-secondary">Неизвестен</span>
+            {% endif %}
+            </p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-center fs-5">Нямате активни поръчки.</p>
+    {% endif %}
+
+    <div class="text-center mt-4">
+      <a href="{% url 'client_dashboard' %}" class="btn btn-primary">⬅️ Обратно към дашбоарда</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Финализиране на поръчка{% endblock %}
+
+{% block content %}
+<div class="bg-image d-flex justify-content-center align-items-center" style="background-image: url('/static/images/checkout.jpg'); height: 100vh; background-size: cover; background-position: center;">
+    <div class="bg-white p-5 rounded shadow" style="width: 100%; max-width: 500px;">
+        <h2 class="text-center mb-4">Финализиране на поръчка</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.address.label_tag }}
+                {{ form.address }}
+            </div>
+            <div class="mb-3">
+                {{ form.phone_number.label_tag }}
+                {{ form.phone_number }}
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">Финализирай поръчка</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

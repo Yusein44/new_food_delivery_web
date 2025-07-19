@@ -1,0 +1,19 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+{% block title %}Дашбоард за доставчици{% endblock %}
+
+{% block content %}
+<div class="bg-image d-flex justify-content-center align-items-center" style="background-image: url('{% static "images/delivery-person-dashboard.jpg" %}'); background-size: cover; background-position: center; height: 100vh;">
+    <div class="bg-dark bg-opacity-75 text-white p-5 rounded shadow" style="max-width: 500px; width: 100%;">
+        <h1 class="mb-4 text-center">Добре дошли, доставчик!</h1>
+        <p class="mb-4 text-center">Тук можете да управлявате доставки.</p>
+        <div class="d-grid gap-3">
+            <a href="{% url 'delivery_dashboard' %}" class="btn btn-primary btn-lg">Преглед на доставки</a>
+            <form method="post">
+                {% csrf_token %}
+                <button formaction="{% url 'logout' %}" class="btn btn-danger btn-lg">Изход</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Добавяне на ресторант{% endblock %}
+
+{% block content %}
+<div class="add-restaurant-bg py-5" style="background: url('{% static 'images/add-restaurant.jpg' %}') no-repeat center center; background-size: cover;">
+  <div class="container bg-dark bg-opacity-75 p-4 rounded">
+    <h1 class="text-white mb-4">Добавяне на ресторант</h1>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Запази</button>
+    </form>
+    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary mt-3">Обратно към дашбоарда</a>
+  </div>
+</div>
+{% endblock %}

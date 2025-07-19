@@ -1,0 +1,18 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Изтриване на ресторант{% endblock %}
+
+{% block content %}
+<div class="delete-restaurant-bg py-5" style="background: url('{% static 'images/delete-restaurant.jpg' %}') no-repeat center center; background-size: cover;">
+  <div class="container bg-dark bg-opacity-75 p-4 rounded text-white text-center">
+    <h1 class="mb-4">Сигурни ли сте, че искате да изтриете ресторанта:</h1>
+    <h3 class="mb-4">{{ restaurant.name }}</h3>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">🗑️ Изтрий</button>
+      <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary ms-2">⬅️ Назад</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

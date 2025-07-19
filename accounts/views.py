@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+
 from .models import *
 from .forms import CustomUserCreationForm, CheckoutForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -278,6 +280,8 @@ def add_to_cart(request, pk):
         cart_item.quantity += 1
         cart_item.save()
     return redirect('view_products')
+
+
 @login_required
 def view_cart(request):
     if not request.user.is_client:
