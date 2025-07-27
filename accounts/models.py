@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-
+from django.core.validators import MinValueValidator
 
 
 class User(AbstractUser):
@@ -9,20 +9,35 @@ class User(AbstractUser):
     is_employee = models.BooleanField(default=False)
     is_delivery_person = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.username
+
+
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     address = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Клиент: {self.user.username}"
+
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     department = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f"Служител: {self.user.username}"
+
+
 class DeliveryPerson(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     vehicle_type = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"Доставчик: {self.user.username}"
+
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -34,6 +49,7 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
@@ -47,7 +63,7 @@ class Product(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
 
     def __str__(self):
@@ -61,22 +77,31 @@ class Order(models.Model):
         ('cancelled', 'Отказана'),
     ]
 
-    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='orders')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='orders')
     products = models.ManyToManyField(Product, through='OrderItem')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(default=timezone.now)
-    delivery_person = models.ForeignKey('User', null=True, blank=True, on_delete=models.SET_NULL, related_name='deliveries')
-    address = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    delivery_person = models.ForeignKey(User, null=True, blank=True,
+               on_delete=models.SET_NULL, related_name='deliveries')
+    address = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
 
     def __str__(self):
         return f"Поръчка #{self.id} от {self.client.user.username}"
 
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -91,10 +116,11 @@ class Delivery(models.Model):
     def __str__(self):
         return f"Доставка за поръчка #{self.order.id}"
 
+
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} (Потребител: {self.user.username})"
