@@ -50,6 +50,27 @@
       </div>
     </div>
 
+    <div class="mt-5">
+      <h2>Коментари към поръчки от клиенти</h2>
+      <ul class="list-group">
+        {% for order in orders %}
+          <li class="list-group-item text-dark">
+            <strong>Поръчка #{{ order.id }}</strong> —
+            {{ order.client.user.username }}<br>
+            📍 Адрес: {{ order.address }} | ☎️ Тел: {{ order.phone_number }}<br>
+            📝 <strong>Коментар:</strong>
+            {% if order.comment %}
+              {{ order.comment }}
+            {% else %}
+              (няма коментар)
+            {% endif %}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-dark">Няма направени поръчки.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
     <div class="text-center mt-4">
       <a href="{% url 'logout' %}" class="btn btn-danger">Изход</a>
     </div>

@@ -1,12 +1,17 @@
 from django.urls import path
 from . import views
-
 from .views import (
     ClientDashboardView,
     EmployeeDashboardView,
     ProductCreateView,
     ProductUpdateView,
     ProductDeleteView,
+    AboutView,
+    ContactView,
+    FAQView,
+    user_profile,
+    ProductListAPI,
+    OrderListAPI,
 )
 
 urlpatterns = [
@@ -32,4 +37,10 @@ urlpatterns = [
     path('track-orders/', views.track_orders, name='track_orders'),
     path('accept-delivery/<int:pk>/', views.accept_delivery, name='accept_delivery'),
     path('mark-as-delivered/<int:pk>/', views.mark_as_delivered, name='mark_as_delivered'),
+    path('about/', AboutView.as_view(), name='about'),
+    path('contact/', ContactView.as_view(), name='contact'),
+    path('profile/', user_profile, name='user_profile'),
+    path('faq/', FAQView.as_view(), name='faq'),
+    path('api/v2/products/', ProductListAPI.as_view(), name='drf_products'),
+    path('api/v2/orders/', OrderListAPI.as_view(), name='drf_orders'),
 ]

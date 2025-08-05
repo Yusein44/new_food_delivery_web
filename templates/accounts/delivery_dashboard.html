@@ -57,5 +57,7 @@
     {% else %}
         <p class="text-center text-muted">❌ Няма активни поръчки в момента.</p>
     {% endif %}
+
+    <a href="{% url 'delivery_person_dashboard' %}" class="btn btn-secondary mt-4">⬅️ Назад към таблото</a>
 </div>
 {% endblock %}

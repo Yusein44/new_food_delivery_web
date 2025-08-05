@@ -3,9 +3,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib import messages
-from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+
+from django.core.paginator import Paginator
+from rest_framework.generics import ListAPIView
+from .serializers import ProductSerializer, OrderSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from .models import (
     Client, CartItem, Order, OrderItem,
@@ -13,7 +20,7 @@ from .models import (
 )
 from .forms import (
     CustomUserCreationForm, RestaurantForm,
-    ProductForm, OrderForm, CheckoutForm
+    ProductForm, OrderForm, CheckoutForm, ContactForm
 )
 
 
@@ -22,23 +29,17 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            role = form.cleaned_data.get('role')
-            if role == 'client':
-                user.is_client = True
-            elif role == 'employee':
-                user.is_employee = True
-            elif role == 'delivery_person':
-                user.is_delivery_person = True
+            user.is_client = True
             user.save()
 
-            if user.is_client:
-                Client.objects.create(user=user, address='Default Address')
+            Client.objects.create(user=user, address='Default Address')
 
             messages.success(request, f'Акаунтът за {user.username} е създаден успешно!')
             return redirect('login')
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
+
 
 
 def login(request):
@@ -145,10 +146,20 @@ def view_products(request):
         return redirect('home')
 
     category = request.GET.get('category')
+    search_query = request.GET.get('search', '')
+
+
+    product_list = Product.objects.all()
+
     if category:
-        products = Product.objects.filter(category=category)
-    else:
-        products = Product.objects.all()
+        product_list = product_list.filter(category=category)
+
+    if search_query:
+        product_list = product_list.filter(name__icontains=search_query)
+
+    paginator = Paginator(product_list, 5)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
 
     categories = Product.CATEGORY_CHOICES
 
@@ -169,7 +180,9 @@ def view_products(request):
     return render(request, 'accounts/view_products.html', {
         'products': products,
         'categories': categories,
+        'search_query': search_query,
     })
+
 
 class ClientDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'accounts/client_dashboard.html'
@@ -188,6 +201,7 @@ class EmployeeDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
         context = super().get_context_data(**kwargs)
         context['restaurants'] = Restaurant.objects.all()
         context['products'] = Product.objects.all()
+        context['orders'] = Order.objects.all().order_by('-created_at')
         return context
 
 
@@ -258,58 +272,6 @@ def remove_from_cart(request, pk):
 
 
 @login_required
-def create_order(request):
-    if not request.user.is_client:
-        return redirect('home')
-
-    category = request.GET.get('category')
-    if category:
-        products = Product.objects.filter(category=category)
-    else:
-        products = Product.objects.all()
-
-    categories = Product.CATEGORY_CHOICES
-
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        try:
-            if form.is_valid():
-                order = form.save(commit=False)
-                order.client = Client.objects.get(user=request.user)
-
-                total_price = 0
-                for item in form.cleaned_data['items']:
-                    quantity = int(request.POST.get(f'quantity_{item.id}', 1))
-                    total_price += item.price * quantity
-
-                order.total_price = total_price
-                order.save()
-
-                for item in form.cleaned_data['items']:
-                    quantity = int(request.POST.get(f'quantity_{item.id}', 1))
-                    OrderItem.objects.create(
-                        order=order,
-                        product=item,
-                        quantity=quantity,
-                        price=item.price * quantity
-                    )
-
-                return redirect('checkout', order_id=order.pk)
-            else:
-                messages.error(request, "Формата не е валидна. Моля, проверете данните.")
-        except Exception:
-            messages.error(request, "Възникна неочаквана грешка при създаване на поръчката.")
-    else:
-        form = OrderForm()
-
-    return render(request, 'accounts/create_order.html', {
-        'form': form,
-        'products': products,
-        'categories': categories,
-    })
-
-
-@login_required
 def checkout(request):
     if not request.user.is_client:
         return redirect('home')
@@ -322,20 +284,22 @@ def checkout(request):
         if form.is_valid():
             address = form.cleaned_data['address']
             phone_number = form.cleaned_data['phone_number']
+            comment = form.cleaned_data['comment']
 
             order = Order.objects.create(
-                client=client,
-                total_price=sum(item.product.price * item.quantity for item in cart_items),
-                status='pending',
-                address=address,
-                phone_number=phone_number
+                client = client,
+                total_price = sum(item.product.price * item.quantity for item in cart_items),
+                status = 'pending',
+                address = address,
+                phone_number = phone_number,
+                comment=comment
             )
             for item in cart_items:
                 OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price=item.product.price * item.quantity
+                    order = order,
+                    product = item.product,
+                    quantity = item.quantity,
+                    price = item.product.price * item.quantity
                 )
             cart_items.delete()
             return redirect('client_dashboard')
@@ -352,3 +316,46 @@ def track_orders(request):
     client = Client.objects.get(user=request.user)
     orders = Order.objects.filter(client=client).order_by('-created_at')
     return render(request, 'accounts/track_orders.html', {'orders': orders})
+
+
+class AboutView(TemplateView):
+    template_name = 'accounts/about.html'
+
+
+class ContactView(LoginRequiredMixin, FormView):
+    template_name = 'accounts/contact.html'
+    form_class = ContactForm
+    success_url = '/contact/?success=1'
+    login_url = 'login'
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+
+@login_required
+def user_profile(request):
+    context = {
+        'user': request.user,
+    }
+    if request.user.is_client:
+        context['client'] = request.user.client
+
+    return render(request, 'accounts/profile.html', context)
+
+
+class FAQView(TemplateView):
+    template_name = 'accounts/faq.html'
+
+
+class ProductListAPI(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+class OrderListAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(client__user=request.user)
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)

@@ -10,12 +10,20 @@
         <a class="navbar-brand" href="/">Food Delivery</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                <a class="nav-link" href="{% url 'about' %}">За нас</a>
+                </li>
                 {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'user_profile' %}">Профил</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Изход</a></li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Вход</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
                 {% endif %}
+
+                <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Контакт</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'faq' %}">FAQ</a></li>
+
             </ul>
         </div>
     </nav>
@@ -32,12 +40,14 @@
         {% block content %}
         {% endblock %}
     </div>
+
+    <footer class="bg-light text-center text-muted py-2 border-top" style="font-size: 0.9rem;">
+    &copy; {{ now|date:"Y" }} Food Delivery Web — Вкусът, който стига до вратата ти! 🚀🍔
+    </footer>
+
 </body>
 </html>
 
-<footer class="bg-light text-center text-muted py-2 border-top" style="font-size: 0.9rem;">
-    &copy; {{ now|date:"Y" }} Food Delivery Web — Вкусът, който стига до вратата ти! 🚀🍔
-</footer>
 
 
 

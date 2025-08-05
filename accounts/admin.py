@@ -26,6 +26,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     search_fields = ('client__user__username',)
     ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'total_price')
+
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):

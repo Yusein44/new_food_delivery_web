@@ -1,0 +1,81 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Често Задавани Въпроси{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">❓ Често Задавани Въпроси</h2>
+    <div class="accordion" id="faqAccordion">
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="q1">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1">
+                    Как да направя поръчка?
+                </button>
+            </h2>
+            <div id="a1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    За да направите поръчка, трябва да сте регистриран като клиент. Изберете продукти и ги добавете в количката, след което отидете на "Поръчай".
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="q2">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2">
+                    Колко време отнема доставката?
+                </button>
+            </h2>
+            <div id="a2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Обикновено доставката се извършва в рамките на 30–60 минути, в зависимост от натовареността и локацията.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="q3">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3">
+                    Мога ли да отменя поръчка?
+                </button>
+            </h2>
+            <div id="a3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Да, можете да отмените поръчка, ако все още не е приета от доставчик. Моля, свържете се с нас възможно най-скоро.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="q4">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a4">
+                    Какво да направя ако имам проблем с доставката?
+                </button>
+            </h2>
+            <div id="a4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Използвайте формата за контакт или ни пишете на support@fooddelivery.bg. Ще отговорим възможно най-бързо!
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-secondary me-2">⬅️ Изход</a>
+
+        {% if user.is_authenticated %}
+            {% if user.is_client %}
+                <a href="{% url 'client_dashboard' %}" class="btn btn-primary">⬅️ Назад към таблото</a>
+            {% elif user.is_employee %}
+                <a href="{% url 'employee_dashboard' %}" class="btn btn-primary">⬅️ Назад към таблото</a>
+            {% elif user.is_delivery_person %}
+                <a href="{% url 'delivery_dashboard' %}" class="btn btn-primary">⬅️ Назад към таблото</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

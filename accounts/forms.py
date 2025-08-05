@@ -1,18 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Restaurant, Product, Order
+from .models import User, Restaurant, Product, Order, ContactMessage
+
 
 class CustomUserCreationForm(UserCreationForm):
-    ROLE_CHOICES = [
-        ('client', 'Клиент'),
-        ('employee', 'Служител'),
-        ('delivery_person', 'Доставчик'),
-    ]
-    role = forms.ChoiceField(choices=ROLE_CHOICES, label='Роля')
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'role']
-
+        fields = ['username', 'password1', 'password2']
 
 class RestaurantForm(forms.ModelForm):
     class Meta:
@@ -58,3 +52,14 @@ class CheckoutForm(forms.Form):
         label="Телефонен номер",
         widget=forms.TextInput(attrs={'placeholder': '+359...'})
     )
+
+    comment = forms.CharField(
+        required=False,
+        label="Коментар към поръчката (по избор)",
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Вашето мнение е важно за нас ! :)'})
+    )
+
+class ContactForm(forms.Form):
+    name = forms.CharField(label='Име', max_length=100)
+    email = forms.EmailField(label='Имейл')
+    message = forms.CharField(label='Съобщение', widget=forms.Textarea)

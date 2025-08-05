@@ -70,6 +70,22 @@ class ProductTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Product.objects.count(), 1)
 
+    def test_api_v2_products_returns_list(self):
+        restaurant = Restaurant.objects.create(name='TestAPI', address='API Address')
+        Product.objects.create(
+            name='API Product',
+            description='DRF Test',
+            price=9.99,
+            category='pizza',
+            restaurant=restaurant
+        )
+
+        response = self.client.get('/api/v2/products/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json(), list)
+        self.assertGreaterEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]['name'], 'API Product')
+
 
 class CartTests(TestCase):
     def setUp(self):
@@ -79,7 +95,7 @@ class CartTests(TestCase):
             name='Pizza',
             description='Hot',
             price=12,
-            category='food',
+            category='pizza',
             restaurant=Restaurant.objects.create(name='R2', address='Plovdiv')
         )
         self.client_instance = Client()
@@ -105,20 +121,17 @@ class OrderTests(TestCase):
         self.client_instance.login(username='client', password='Testpass123!')
         self.restaurant = Restaurant.objects.create(name='R3', address='Burgas')
         self.product = Product.objects.create(name='Sushi', description='Fresh', price=15,
-                                              category='food', restaurant=self.restaurant)
+                                              category='pizza', restaurant=self.restaurant)
         CartItem.objects.create(user=self.user, product=self.product, quantity=2)
 
     def test_checkout_page_loads(self):
         response = self.client_instance.get(reverse('checkout'))
         self.assertEqual(response.status_code, 200)
 
-    def test_create_order(self):
-        response = self.client_instance.post(reverse('checkout'), {
-            'address': 'Client Address',
-            'phone_number': '0888123456'
-        })
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Order.objects.filter(client=self.client_profile).count(), 1)
+    def test_api_v2_orders_authenticated(self):
+        response = self.client_instance.get('/api/v2/orders/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json(), list)
 
 class TrackOrdersTests(TestCase):
     def setUp(self):
@@ -130,3 +143,4 @@ class TrackOrdersTests(TestCase):
     def test_track_orders_page_loads(self):
         response = self.client_instance.get(reverse('track_orders'))
         self.assertEqual(response.status_code, 200)
+

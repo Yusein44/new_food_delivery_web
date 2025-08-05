@@ -4,44 +4,45 @@
 {% block title %}Начало{% endblock %}
 
 {% block content %}
-<style>
-    body {
-        background-image: url("{% static 'images/background_home.jpg' %}");
-        background-size: cover;
-        background-position: center;
-        min-height: 100vh;
-    }
-    .home-container {
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 3rem;
-        border-radius: 1rem;
-        text-align: center;
-        max-width: 600px;
-        margin: 6rem auto;
-        color: white;
-        box-shadow: 0 0 15px rgba(0,0,0,0.7);
-    }
-    .home-container h1 {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-    .home-container p {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
-    .home-container .btn {
-        min-width: 140px;
-        margin: 0.5rem;
-    }
-</style>
+<div class="d-flex flex-column min-vh-100">
+    <style>
+        body {
+            background-image: url("{% static 'images/background_home.jpg' %}");
+            background-size: cover;
+            background-position: center;
+        }
+        .home-container {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 3rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 600px;
+            margin: auto;
+            color: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.7);
+        }
+        .home-container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .home-container p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .home-container .btn {
+            min-width: 140px;
+            margin: 0.5rem;
+        }
+    </style>
 
-<div class="home-container">
-    <h1>Добре дошли в Food Delivery Web!</h1>
-    <p>Моля, изберете една от следните опции:</p>
-    <form method="post">
-        {% csrf_token %}
-        <a href="{% url 'login' %}" class="btn btn-primary">Вход</a>
-        <a href="{% url 'register' %}" class="btn btn-success">Регистрация</a>
-    </form>
+    <div class="home-container mt-5 mb-5">
+        <h1>Добре дошли в Food Delivery Web!</h1>
+        <p>Моля, изберете една от следните опции:</p>
+        <form method="post">
+            {% csrf_token %}
+            <a href="{% url 'login' %}" class="btn btn-primary">Вход</a>
+            <a href="{% url 'register' %}" class="btn btn-success">Регистрация</a>
+        </form>
+    </div>
 </div>
 {% endblock %}

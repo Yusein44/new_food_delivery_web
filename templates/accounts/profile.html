@@ -1,0 +1,36 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Профил{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">👤 Профил</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Потребителско име:</strong> {{ user.username }}</p>
+            <p><strong>Имейл:</strong> {{ user.email|default:"(не е посочен)" }}</p>
+
+            <p><strong>Роля:</strong>
+                {% if user.is_client %}Клиент
+                {% elif user.is_employee %}Служител
+                {% elif user.is_delivery_person %}Доставчик
+                {% endif %}
+            </p>
+
+            {% if client %}
+                <p><strong>Адрес:</strong> {{ client.address }}</p>
+            {% endif %}
+
+            {% if user.is_client %}
+                <a href="{% url 'client_dashboard' %}" class="btn btn-outline-secondary mt-3">⬅️ Назад към таблото</a>
+            {% elif user.is_employee %}
+                <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-secondary mt-3">⬅️ Назад към таблото</a>
+            {% elif user.is_delivery_person %}
+                <a href="{% url 'delivery_dashboard' %}" class="btn btn-outline-secondary mt-3">⬅️ Назад към таблото</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

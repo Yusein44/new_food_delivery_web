@@ -1,0 +1,32 @@
+{% extends 'accounts/base.html' %}
+{% block title %}За нас | Food Delivery{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow p-4">
+        <h2 class="text-center mb-4">🍕 За Food Delivery</h2>
+        <p>
+            Добре дошли във Food Delivery — вашият бърз и лесен начин да поръчате храна от любимите си ресторанти!
+            Нашата платформа свързва клиенти, ресторанти и доставчици, за да направим храненето по-удобно от всякога.
+        </p>
+        <p>
+            Независимо дали сте гладен клиент, готвач в натоварен ресторант или бърз доставчик — ние сме тук за вас!
+        </p>
+
+        <div class="mt-4 d-flex justify-content-between">
+            {% if user.is_authenticated %}
+                {% if user.is_client %}
+                    <a href="{% url 'client_dashboard' %}" class="btn btn-primary">⬅️ Обратно към таблото</a>
+                {% elif user.is_employee %}
+                    <a href="{% url 'employee_dashboard' %}" class="btn btn-primary">⬅️ Обратно към таблото</a>
+                {% elif user.is_delivery_person %}
+                    <a href="{% url 'delivery_dashboard' %}" class="btn btn-primary">⬅️ Обратно към таблото</a>
+                {% endif %}
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger">Изход</a>
+            {% else %}
+                <a href="{% url 'home' %}" class="btn btn-secondary">⬅️ Начало</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
