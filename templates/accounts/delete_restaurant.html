@@ -10,7 +10,7 @@
     <h3 class="mb-4">{{ restaurant.name }}</h3>
     <form method="post">
       {% csrf_token %}
-      <button type="submit" class="btn btn-danger">🗑️ Изтрий</button>
+      <button type="submit" class="btn btn-danger">Изтрий</button>
       <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary ms-2">⬅️ Назад</a>
     </form>
   </div>

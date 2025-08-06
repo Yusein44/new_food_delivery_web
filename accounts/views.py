@@ -13,6 +13,8 @@ from .serializers import ProductSerializer, OrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.core.exceptions import PermissionDenied
+
 
 from .models import (
     Client, CartItem, Order, OrderItem,
@@ -185,6 +187,8 @@ def view_products(request):
 
 
 class ClientDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    login_url = 'login'
+    redirect_field_name = 'next'
     template_name = 'accounts/client_dashboard.html'
 
     def test_func(self):
@@ -206,12 +210,14 @@ class EmployeeDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
 
 
 def delivery_person_dashboard(request):
+    if not request.user.is_delivery_person:
+        raise PermissionDenied("Нямате достъп до тази страница")
     return render(request, 'accounts/delivery_person_dashboard.html')
 
 @login_required
 def delivery_dashboard(request):
     if not request.user.is_delivery_person:
-        return redirect('home')
+        raise PermissionDenied("Нямате достъп до тази страница")
 
     orders = Order.objects.filter(status__in=['pending', 'shipped']).order_by('-created_at')
 
@@ -359,3 +365,7 @@ class OrderListAPI(APIView):
         orders = Order.objects.filter(client__user=request.user)
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
+
+
+def custom_permission_denied_view(request, exception=None):
+    return render(request, 'accounts/403.html', status=403)
