@@ -144,3 +144,4 @@ class TrackOrdersTests(TestCase):
         response = self.client_instance.get(reverse('track_orders'))
         self.assertEqual(response.status_code, 200)
 
+
